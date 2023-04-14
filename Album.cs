@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+
 namespace RhythmsGonnaGetYou
 {
     public class Album
@@ -7,5 +9,6 @@ namespace RhythmsGonnaGetYou
         public bool IsExplicit { get; set; }
         public string ReleaseDate { get; set; }
         public int BandId { get; set; }
+        public List<Band> Band { get; set;}
     }
 }

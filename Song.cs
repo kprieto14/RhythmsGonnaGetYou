@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+
 namespace RhythmsGonnaGetYou
 {
     public class Song
@@ -7,5 +9,6 @@ namespace RhythmsGonnaGetYou
         public string Title { get; set; }
         public string Duration { get; set; }
         public int AlbumId { get; set; }
+        public List<Album> Album { get; set; }
     }
 }

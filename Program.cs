@@ -3,6 +3,7 @@ using System.Linq;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using Microsoft.EntityFrameworkCore;
 //using CsvHelper;
 //using CsvHelper.Configuration;
 
@@ -38,14 +39,18 @@ namespace RhythmsGonnaGetYou
     static void Main(string[] args)
     {
       var context = new MusicDatabaseContext();  
-      
-      Console.WriteLine("Welcome to C#");
+
+      var bandsWithAlbums = context.Albums.Include(album => album.Band);
+      var songsWithAlbums = context.Songs.Include(song => song.Album);
+
+      Console.WriteLine("🎶🎵 Welcome to my Music Database 🎶🎵");
 
       var keepGoing = true;
       while(keepGoing == true)
       {
         var response = PromptForString("\nWhat would you like to do during your visit? \n(A)dd New Information \n(V)iew Information \n(E)dit Band Information \n(Q)uit \n");
 
+      
         switch(response)
         {
           //Will add bands, albums, and/ or songs
@@ -89,7 +94,10 @@ namespace RhythmsGonnaGetYou
                 {
                   //View all albums
                   case "A":
-                    Console.WriteLine("\nYou have chosen to view all bands!");
+                    foreach (var band in context.Artists)
+                    {
+                      Console.WriteLine($"\n{band.Name} is from {band.CountryOfOrigin} and has {band.NumberOfMembers} members.");
+                    }
                     break;
                   
                   //View only bands that are signed
