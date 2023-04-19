@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
 namespace RhythmsGonnaGetYou
 {
@@ -11,6 +12,9 @@ namespace RhythmsGonnaGetYou
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             optionsBuilder.UseNpgsql("server=localhost;database=NewMusicDatabase");
+
+            //var loggerFactory = LoggerFactory.Create(builder => builder.AddConsole());
+            //optionsBuilder.UseLoggerFactory(loggerFactory); 
         }
     }
 }

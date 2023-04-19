@@ -9,6 +9,6 @@ namespace RhythmsGonnaGetYou
         public string Title { get; set; }
         public string Duration { get; set; }
         public int AlbumId { get; set; }
-        public List<Album> Album { get; set; }
+        public Album Album { get; set; }
     }
 }

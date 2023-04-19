@@ -9,6 +9,6 @@ namespace RhythmsGonnaGetYou
         public bool IsExplicit { get; set; }
         public string ReleaseDate { get; set; }
         public int BandId { get; set; }
-        public List<Band> Band { get; set;}
+        public Artist Artist { get; set;}
     }
 }
