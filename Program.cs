@@ -11,13 +11,24 @@ namespace RhythmsGonnaGetYou
 {
   class Program
   {
-    static string PromptForString(string prompt)
+    static string PromptForString(string prompt, bool upper)
     {
+      var useUpper = upper;
       //This method will always call for a prompt to print, then read what the user inputs into the console and returns the response
       Console.Write(prompt);
-      var userInput = Console.ReadLine().ToUpper();
-
-      return userInput;
+      
+      //If the program calls for the string to be in all UpperCase
+      if(useUpper == true)
+      {
+        var userInput = Console.ReadLine().ToUpper();
+        return userInput;
+      }
+      //Otherwise, will send what the userinputs as is
+      else
+      {
+        var userInput = Console.ReadLine();
+        return userInput;
+      }
     }
     static int PromptForInteger(string prompt)
     {
@@ -39,16 +50,15 @@ namespace RhythmsGonnaGetYou
     static void ViewInformation(MusicDatabaseContext database)
     {
       var context = database;
-      var songsWithAlbums = context.Songs.Include(song => song.Album);
       var bandsWithAlbums = context.Albums.Include(album => album.Artist);
 
-      var response = PromptForString("\nWould you like to view: \n(B)ands \n(A)lbums \n");
+      var response = PromptForString("\nWould you like to view: \n(B)ands \n(A)lbums \n", true);
 
       switch(response)
       {
         //Chosen to see band information
         case "B":
-          response = PromptForString("\nWould you like to view \n(A)ll Bands \n(S)igned Bands \n(U)nsigned Bands \n");
+          response = PromptForString("\nWould you like to view \n(A)ll Bands \n(S)igned Bands \n(U)nsigned Bands \n", true);
 
           switch(response)
           {
@@ -102,7 +112,7 @@ namespace RhythmsGonnaGetYou
               //Otherwise prints no bands
               else
               {
-                Console.WriteLine("\nThere are no bands that are signed.");  
+                Console.WriteLine("\nThere are no bands that are unsigned.");  
               }
               break;
             
@@ -114,7 +124,7 @@ namespace RhythmsGonnaGetYou
 
         //Chosen to see album information
         case "A":
-          response = PromptForString("\nWould you like to view \n(A)ll Albums \n(S)earch for Albums From a Specific Band \n");
+          response = PromptForString("\nWould you like to view \n(A)ll Albums \n(S)earch for Albums From a Specific Band \n", true);
 
           switch(response)
           {
@@ -143,7 +153,7 @@ namespace RhythmsGonnaGetYou
                 Console.WriteLine($"{band.Name}");
               }
 
-              response = PromptForString("\nWhich band's albums do you want to view? ");
+              response = PromptForString("\nWhich band's albums do you want to view? ", true);
               //Locates if what the user inputted is a band in the system
               var foundArtist = context.Artists.FirstOrDefault(band => band.Name.ToUpper() == response);
               //If it locates a valid band, will print out their albums
@@ -206,14 +216,14 @@ namespace RhythmsGonnaGetYou
       var keepGoing = true;
       while(keepGoing == true)
       {
-        var response = PromptForString("\nWhat would you like to do during your visit? \n(A)dd New Information \n(V)iew Information \n(E)dit Band Information \n(Q)uit \n");
+        var response = PromptForString("\nWhat would you like to do during your visit? \n(A)dd New Information \n(V)iew Information \n(E)dit Band Information \n(Q)uit \n", true);
 
       
         switch(response)
         {
           //Will add bands, albums, and/ or songs
           case "A":
-            response = PromptForString("\nWould you like to add a new: \n(B)and \n(A)lbum \n(S)ong \n");
+            response = PromptForString("\nWould you like to add a new: \n(B)and \n(A)lbum \n(S)ong \n", true);
             
             switch(response)
             {
@@ -245,18 +255,134 @@ namespace RhythmsGonnaGetYou
           
           //Chosen to either Sign or Unsign a band
           case "E":
-            response = PromptForString("\nWould you like to \n(L)et a Band Go \n(R)esign a Band");
+            response = PromptForString("\nWould you like to \n(L)et a Band Go \n(R)e-sign a Band? ", true);
 
             switch(response)
             {
-              //Let Unsign band
+              //Unsign a band
               case "L":
-                Console.WriteLine("\nTime to put a band out of commission.");
+                //Makes a list of all of the signed bands
+                var signedBands = context.Artists.Where(band => band.IsSigned == true);
+
+                //If there is 1 or more, it will print out each band 
+                if(signedBands.Count() > 0)
+                {
+                  Console.WriteLine("\nHere is a list of our signed bands:");
+                  foreach (var band in context.Artists)
+                  {
+                    if(band.IsSigned == true)
+                    {
+                      Console.WriteLine($"\n{band.Name}");
+                    }
+                  }
+                  response = PromptForString("\nWhich band would you like to unsign? ", true);
+
+                  //Locates if what the user inputted is a band in the system
+                  var foundArtist = context.Artists.FirstOrDefault(band => band.Name.ToUpper() == response);
+                  //First checks if the band exists
+                  if(foundArtist == null)
+                  {
+                    Console.WriteLine("\nSorry, no such band exists. Please try again.");
+                  }
+                  //Then it double-checks if the band entered is NOT signed
+                  else if(foundArtist.IsSigned == false)
+                  {
+                    Console.WriteLine($"\nUh oh, looks like {foundArtist.Name} is already let go. Please try again.");
+                  }
+                  //Otherwise if the band is not let go, will prompt user to double check if they want to let them go
+                  else
+                  {
+                    response = PromptForString($"\nAre you sure you want to un-sign {foundArtist.Name}? (Y/N) ", true);
+
+                    if(response == "Y")
+                    {
+                      foundArtist.IsSigned = false;
+                      context.SaveChanges();
+                      Console.WriteLine($"\n{foundArtist.Name} is now un-signed, hopefully they make more music in the future.");
+                    }
+                    else if (response == "N")
+                    {
+                      Console.WriteLine($"\nI will leave {foundArtist.Name} alone.");
+                    }
+                    else
+                    {
+                      Console.WriteLine($"\nI am not sure what you are saying. I will leave {foundArtist.Name} alone.");
+                    }
+                  }
+                }
+                //Otherwise prints no bands and does not give a chance for you to unsign them
+                else
+                {
+                  Console.WriteLine("\nThere are no bands to let go.");  
+                }
                 break;
               
               //Re-sign band
               case "R":
-                Console.WriteLine("\nLets sign them out of retirement!");
+                var unSignedBands = context.Artists.Where(band => band.IsSigned == false);
+
+                //If there is 1 or more, it will print out each band 
+                if(unSignedBands.Count() > 0)
+                {
+                  Console.WriteLine("\nHere are the list of bands that are no longer signed and making music: \n");
+                  foreach (var band in context.Artists)
+                  {
+                    if(band.IsSigned == false)
+                    {
+                      Console.WriteLine($"{band.Name}");
+                    }
+                  }
+                  response = PromptForString("\nWhich band would you like to sign back up? ", true);
+
+                  //Locates if what the user inputted is a band in the system
+                  var foundArtist = context.Artists.FirstOrDefault(band => band.Name.ToUpper() == response);
+                  //First checks if the band exists
+                  if(foundArtist == null)
+                  {
+                    Console.WriteLine("\nSorry, no such band exists. Please try again.");
+                  }
+                  //Then it double-checks if the band entered is NOT signed
+                  else if(foundArtist.IsSigned == true)
+                  {
+                    Console.WriteLine($"\nUh oh, looks like {foundArtist.Name} is still signed and making music. Please try again.");
+                  }
+                  //Otherwise if the band is not signed, will prompt user to double check if they want to sign them back up
+                  else
+                  {
+                    response = PromptForString($"\nAre you sure you want to re-sign {foundArtist.Name}? (Y/N) ", true);
+
+                    if(response == "Y")
+                    {
+                      //Checks if the band being signed has their Contact Information stored
+                      if (foundArtist.ContactName == null)
+                      {
+                        foundArtist.ContactName = PromptForString($"\nUh oh! Looks like {foundArtist.Name} is missing their Contact's name, could you please tell me what it is? Please remember punctuation matters :) ", false);
+                      }
+                      if(foundArtist.ContactPhoneNumber == null)
+                      {
+                        foundArtist.ContactPhoneNumber = PromptForString($"\nUh oh! Looks like {foundArtist.Name} is missing their contact phone number. Can you please enter their number using entering xxx-xxx-xxxx: ", false);
+                      }
+
+                      //Otherwise signs the band back up
+                      foundArtist.IsSigned = true;
+                      context.SaveChanges();
+                      Console.WriteLine($"\n{foundArtist.Name} is now re-signed, I can't wait to hear their new music!");
+                    }
+                    else if (response == "N")
+                    {
+                      Console.WriteLine($"\nI will leave {foundArtist.Name} alone.");
+                    }
+                    else
+                    {
+                      Console.WriteLine($"\nI am not sure what you are saying. I will leave {foundArtist.Name} alone.");
+                    }
+                  }
+                }
+                //Otherwise prints no bands
+                else
+                {
+                  Console.WriteLine("\nThere are no bands to sign-up.");  
+                }
                 break;
               
               default:
